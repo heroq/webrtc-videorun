@@ -27,18 +27,15 @@ var server = http.createServer(app);
  const io = require('socket.io')(server);
 
  io.on('connection', (socket) => {
-  console.log("== connection ==");
-   socket.on('join-room', (roomId, userId) => {
-     console.log(">> join-room");
-     roomId = "temp";
-     socket.join(roomId);
-     socket.to(roomId).broadcast.emit('user-connection', userId);
-
-     socket.on('disconnect', () => {
-       socket.to(roomId).broadcast.emit('user-disconnected', userId);
-     });
-   })
- });
+  socket.on('join-room', (roomId, userId) => {
+    socket.join(roomId);
+    socket.to(roomId).broadcast.emit('user-connected', userId);
+    
+    socket.on('disconnect', () => {
+      socket.to(roomId).broadcast.emit('user-disconnected', userId);
+    });
+  });
+});
 
 /**
  * Listen on provided port, on all network interfaces.

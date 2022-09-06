@@ -5,11 +5,18 @@
     const myVideo = document.createElement('video');
     myVideo.muted = true;
     const peers = {};
+
+    // 내장함수 navigator
+    // @mediaDevices 싱글톤 객체
     navigator.mediaDevices
+      // @getUserMedia 화면, 음성 허용
+      // 현재 방식은 promise
       .getUserMedia({
         video: true,
         audio: true,
       })
+      // promise의 then
+      // then는 promise가 반환 했을때 실행
       .then((stream) => {
         addVideoStream(myVideo, stream);
     
