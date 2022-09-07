@@ -10,19 +10,27 @@ navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
 }).then(stream => {
+   
     addVideoStream(myVideo, stream) // Display our video to ourselves
 
     myPeer.on('call', call => { // When we join someone's room we will receive a call from them
         call.answer(stream) // Stream them our video/audio
         const video = document.createElement('video') // Create a video tag for them
-        call.on('stream', userVideoStream => { // When we recieve their stream
+        video.id = call.peer
+        call.on('stream', (userVideoStream) => { // When we recieve their stream
             addVideoStream(video, userVideoStream) // Display their video to ourselves
         })
     })
 
     socket.on('user-connected', userId => { // If a new user connect
-        connectToNewUser(userId, stream) 
+        connectToNewUser(userId, stream);
     })
+
+    socket.on("user-disconnected", (userId)=>{
+        console.log(userId);
+        // remove video or add your code here
+        document.getElementById(userId)[0].remove();
+    });
 })
 
 myPeer.on('open', id => { // When we first open the app, have us join a room
@@ -32,18 +40,19 @@ myPeer.on('open', id => { // When we first open the app, have us join a room
 function connectToNewUser(userId, stream) { // This runs when someone joins our room
     const call = myPeer.call(userId, stream) // Call the user who just joined
     // Add their video
-    const video = document.createElement('video') 
+    const video = document.createElement('video');
     call.on('stream', userVideoStream => {
-        addVideoStream(video, userVideoStream)
+        video.id = userId;
+        addVideoStream(video, userVideoStream, userId)
     })
-    // If they leave, remove their video
+    // error
     call.on('close', () => {
         video.remove()
     })
 }
 
 
-function addVideoStream(video, stream) {
+function addVideoStream(video, stream, userId) {
     video.srcObject = stream 
     video.addEventListener('loadedmetadata', () => { // Play the video as it loads
         video.play()
